@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loops — Build a Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #152a63;
+      --paper: #f2f4fa;
+      --card: #ffffff;
+      --line: #d7deee;
+      --coral: #2f5aa8;
+      --gold: #b8862f;
+      --muted: #4a5578;
+    }
+    html, body { height: 100%; background: var(--paper); color: var(--ink); font-family: 'Nunito', sans-serif; }
+    body { display: flex; flex-direction: column; }
+    
+    .hdr {
+      background: var(--ink);
+      color: white;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .hdr-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .hdr-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--gold);
+      color: var(--ink);
+      padding: 5px 10px;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+    
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border-bottom: 3px solid var(--line);
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .tab {
+      flex: 1;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-bottom: 4px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--coral); }
+    .tab.active {
+      color: var(--coral);
+      border-color: var(--coral);
+    }
+    
+    .panels {
+      flex: 1;
+      overflow: hidden;
+    }
+    .panel {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+      padding: 28px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .panel.active { display: block; }
+    
+    .landing {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .landing h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .landing p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 28px;
+      text-align: left;
+    }
+    .flow-item {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .flow-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .flow-text strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .flow-text {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(47, 90, 168, 0.1);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    button {
+      padding: 12px 20px;
+      background: var(--coral);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #1e4a8a;
+      transform: translateY(-1px);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .loop-card {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .loop-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .loop-count {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .q-item {
+      background: var(--paper);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .q-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .q-item small {
+      color: var(--muted);
+    }
+    
+    .preview-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .preview-frame {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .preview-header {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .preview-q {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    .preview-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .preview-opt {
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 600;
+      transition: all 0.2s;
+      background: var(--card);
+    }
+    .preview-opt:hover:not(:disabled) {
+      border-color: var(--coral);
+      background: var(--paper);
+    }
+    .preview-opt:disabled {
+      opacity: 0.6;
+    }
+    .preview-opt.correct {
+      background: #4caf50;
+      color: white;
+      border-color: #4caf50;
+    }
+    .preview-opt.wrong {
+      background: #f44336;
+      color: white;
+      border-color: #f44336;
+    }
+    #previewInput {
+      width: 100%;
+      margin-top: 12px;
+    }
+    #previewSubmit {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .feedback {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      display: none;
+    }
+    
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 20px;
+    }
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 6px;
+    }
+    .status.success {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    .status.error {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <div class="hdr">
+    <div class="hdr-brand">Loops</div>
+    <div class="hdr-badge">v1</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">1 Basics</div>
+    <div class="tab" onclick="switchTab(1)">2 Content</div>
+    <div class="tab" onclick="switchTab(2)">3 Preview</div>
+    <div class="tab" onclick="switchTab(3)">4 Publish</div>
+  </div>
+
+  <div class="panels">
+    <div class="panel active">
+      <div class="landing">
+        <h2>Build a Learning Game</h2>
+        <p>Three ways to go:</p>
+        <div class="flow">
+          <div class="flow-item">
+            <div class="flow-icon">📄</div>
+            <div class="flow-text">
+              <strong>Paste content or an article</strong>
+              We'll structure it into learning loops.
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-icon">✎</div>
+            <div class="flow-text">
+              <strong>Write a prompt</strong>
+              Like "World capitals, intermediate" — we'll generate it.
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-icon">🔄</div>
+            <div class="flow-text">
+              <strong>Mix both</strong>
+              Paste content and ask us to expand or vary it.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px;">
+        <div class="form-group">
+          <label>Game Name</label>
+          <input type="text" id="gameName" placeholder="e.g., World Capitals">
+        </div>
+        <div class="form-group">
+          <label>Audience</label>
+          <select id="audience">
+            <option value="Language">🌍 Language</option>
+            <option value="Onboarding">🪪 Onboarding</option>
+            <option value="Compliance">🛡️ Compliance</option>
+            <option value="Exam Prep">📝 Exam Prep</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Background Image (optional)</label>
+          <input type="file" id="bgImage" accept="image/*">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="form-group">
+        <label>Paste content or write a prompt</label>
+        <textarea id="contentInput" placeholder="Paste an article, or write: 'World capitals trivia' or 'Spanish past tense, B1'"></textarea>
+      </div>
+      <button onclick="parseContent()" id="parseBtn">✦ Sort into loops automatically</button>
+      <div class="loops-container" id="loopsDisplay"></div>
+    </div>
+
+    <div class="panel">
+      <div class="preview-container" id="previewDisplay"></div>
+    </div>
+
+    <div class="panel">
+      <button onclick="publishGame()" id="publishBtn">Publish to Library</button>
+      <div id="publishStatus"></div>
+    </div>
+  </div>
+
+  <script>
+    let allLoops = [];
+    let backgroundBase64 = null;
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 2) renderPreview();
+    }
+
+    document.getElementById('bgImage').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        backgroundBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function parseContent() {
+      const input = document.getElementById('contentInput').value.trim();
+      if (!input) {
+        alert('Paste content or write a prompt.');
+        return;
+      }
+
+      const btn = document.getElementById('parseBtn');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      try {
+        const res = await fetch('https://dry-credit-f396.seansynge.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'parse', input })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Generation failed');
+
+        allLoops = data.loops || [];
+        displayLoops();
+        btn.textContent = '✦ Sort into loops automatically';
+        btn.disabled = false;
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.textContent = '✦ Sort into loops automatically';
+        btn.disabled = false;
+      }
+    }
+
+    function displayLoops() {
+      let html = '';
+      allLoops.forEach((loop) => {
+        html += `<div class="loop-card"><div class="loop-header">${loop.emoji} ${loop.name}</div><div class="loop-count">${loop.questions.length} questions</div>`;
+        loop.questions.forEach((q) => {
+          let qDisplay = `<strong>${q.type === 'mc' ? '🔘' : '✎'} ${q.q}</strong>`;
+          if (q.type === 'mc') {
+            qDisplay += `<small>Options: ${q.options.join(', ')}<br>Answer: ${q.answer}</small>`;
+          } else {
+            qDisplay += `<small>Answer: ${q.answer}</small>`;
+          }
+          html += `<div class="q-item">${qDisplay}</div>`;
+        });
+        html += `</div>`;
+      });
+      document.getElementById('loopsDisplay').innerHTML = html || '<div class="empty"><div class="empty-icon">📚</div>No loops yet</div>';
+    }
+
+    function renderPreview() {
+      if (allLoops.length === 0) {
+        document.getElementById('previewDisplay').innerHTML = '<div class="empty"><div class="empty-icon">📚</div>Create content first</div>';
+        return;
+      }
+
+      const loop = allLoops[0];
+      const q = loop.questions[0];
+      if (!q) {
+        document.getElementById('previewDisplay').innerHTML = '<div class="empty"><div class="empty-icon">❓</div>No questions</div>';
+        return;
+      }
+
+      let html = `<div class="preview-frame"><div class="preview-header">${loop.emoji} ${loop.name} — Question 1 of ${loop.questions.length}</div><div class="preview-q">${q.q}</div>`;
+
+      if (q.type === 'mc') {
+        html += '<div class="preview-opts">';
+        q.options.forEach(opt => {
+          html += `<button class="preview-opt" onclick="checkMCAnswer(this, '${opt}', '${q.answer}')">${opt}</button>`;
+        });
+        html += '</div>';
+      } else {
+        html += `<input type="text" id="previewInput" placeholder="Type your answer..." /><button id="previewSubmit" onclick="checkTypedAnswer('${q.answer}')">Submit</button>`;
+      }
+
+      html += '<div class="feedback" id="previewFeedback"></div></div>';
+      document.getElementById('previewDisplay').innerHTML = html;
+    }
+
+    function checkMCAnswer(btn, selected, correct) {
+      const feedback = document.getElementById('previewFeedback');
+      const isCorrect = selected === correct;
+      
+      document.querySelectorAll('.preview-opt').forEach(b => b.disabled = true);
+      btn.className = 'preview-opt ' + (isCorrect ? 'correct' : 'wrong');
+      
+      feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Try again';
+      feedback.style.background = isCorrect ? '#c8e6c9' : '#ffcdd2';
+      feedback.style.color = isCorrect ? '#2e7d32' : '#c62828';
+      feedback.style.display = 'block';
+    }
+
+    function checkTypedAnswer(correct) {
+      const input = document.getElementById('previewInput');
+      const feedback = document.getElementById('previewFeedback');
+      const isCorrect = input.value.toLowerCase().trim() === correct.toLowerCase();
+      
+      input.disabled = true;
+      feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Try again';
+      feedback.style.background = isCorrect ? '#c8e6c9' : '#ffcdd2';
+      feedback.style.color = isCorrect ? '#2e7d32' : '#c62828';
+      feedback.style.display = 'block';
+    }
+
+    async function publishGame() {
+      const name = document.getElementById('gameName').value.trim();
+      const audience = document.getElementById('audience').value;
+
+      if (!name) {
+        alert('Enter a game name.');
+        return;
+      }
+
+      if (allLoops.length === 0) {
+        alert('Create content first.');
+        return;
+      }
+
+      const btn = document.getElementById('publishBtn');
+      const status = document.getElementById('publishStatus');
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+      status.textContent = '';
+
+      try {
+        const res = await fetch('https://dry-credit-f396.seansynge.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'publish',
+            gameName: name,
+            audience,
+            loops: allLoops,
+            backgroundBase64
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Publish failed');
+
+        status.innerHTML = `<div class="status success">✓ Published! Game is now in the library.</div>`;
+        btn.textContent = 'Publish to Library';
+      } catch (err) {
+        status.innerHTML = `<div class="status error">✗ Error: ${err.message}</div>`;
+        btn.textContent = 'Publish to Library';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
