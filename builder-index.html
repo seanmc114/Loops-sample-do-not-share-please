@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Loops — Build a Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --navy: #0b2d5c;
+      --blue: #2b6cff;
+      --teal: #00c2b3;
+      --gold: #ffd43b;
+      --panel: rgba(255, 255, 255, 0.94);
+      --ink: #0f172a;
+      --light: #f4f7fb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(43, 108, 255, 0.25), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, rgba(0, 194, 179, 0.20), transparent 55%),
+        linear-gradient(#eef2f7, #dbe4ef);
+      color: var(--ink);
+      position: relative;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(820px, 92vw);
+      margin: 24px auto;
+      padding: 26px;
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(2px);
+    }
+
+    .logo-section { text-align: center; margin-bottom: 28px; }
+    .logo-img { max-width: 260px; width: 100%; height: auto; margin-bottom: 12px; border-radius: 8px; }
+
+    h1 { text-align: center; margin: 0 0 6px; font-size: 1.8rem; font-weight: 900; }
+    .subtitle { text-align: center; margin-bottom: 24px; opacity: 0.85; font-size: 1.05rem; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 3px solid #e2e8f0; }
+
+    .tab {
+      flex: 1; padding: 14px 12px; text-align: center; cursor: pointer;
+      font-weight: 700; font-size: 0.95rem; border: none; background: transparent;
+      color: #64748b; border-bottom: 4px solid transparent; transition: all 0.15s ease;
+    }
+    .tab:hover { color: var(--blue); }
+    .tab.active { color: var(--navy); border-color: var(--navy); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card { padding: 18px; border-radius: 14px; background: var(--light); margin: 15px 0; line-height: 1.6; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.95rem; }
+
+    input, textarea, select {
+      width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+      font-family: inherit; font-size: 1rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43, 108, 255, 0.1);
+    }
+    textarea { resize: vertical; min-height: 120px; }
+
+    button {
+      padding: 12px 20px; border-radius: 20px; border: none; font-size: 1rem; cursor: pointer;
+      color: white; background: linear-gradient(135deg, var(--navy), #134a97);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2); transition: all 0.15s ease; font-weight: 700;
+    }
+    button:hover:not(:disabled) { transform: translateY(-1px); background: linear-gradient(135deg, #134a97, var(--blue)); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+    .loop-card { background: var(--light); border-radius: 14px; padding: 18px; margin-bottom: 16px; border-left: 4px solid var(--blue); }
+    .loop-header { font-weight: 900; font-size: 1.1rem; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; }
+    .loop-count { font-size: 0.85rem; opacity: 0.7; margin-bottom: 12px; }
+    .q-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.9rem; line-height: 1.5; border-left: 3px solid #e2e8f0; }
+    .q-item strong { display: block; margin-bottom: 6px; }
+    .q-item small { color: #64748b; }
+
+    .preview-frame-wrap {
+      background: var(--light); border-radius: 14px; padding: 4px; overflow: hidden;
+    }
+    #previewIframe { width: 100%; height: 620px; border: none; border-radius: 10px; background: #fff; }
+
+    .empty { text-align: center; color: #64748b; padding: 40px 20px; }
+    .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
+
+    .status { margin-top: 20px; padding: 14px; border-radius: 10px; font-weight: 600; }
+    .status.success { background: #dcfce7; color: #166534; }
+    .status.error { background: #fee2e2; color: #991b1b; }
+    .status a { color: inherit; font-weight: 800; }
+
+    .intro-flow { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .intro-item { background: white; border-radius: 10px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; }
+    .intro-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .intro-text { font-size: 0.95rem; line-height: 1.5; }
+    .intro-text strong { display: block; margin-bottom: 4px; }
+
+    footer { text-align: center; padding: 18px; font-size: 0.85rem; opacity: 0.75; }
+
+    @media (max-width: 600px) {
+      .logo-img { max-width: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-section">
+      <img src="Loops_logo.webp" class="logo-img" alt="Loops">
+      <h1>Loops</h1>
+      <div class="subtitle">Learning Tools. Dublin.</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(0)">1 Basics</button>
+      <button class="tab" onclick="switchTab(1)">2 Content</button>
+      <button class="tab" onclick="switchTab(2)">3 Preview</button>
+      <button class="tab" onclick="switchTab(3)">4 Publish</button>
+    </div>
+
+    <!-- BASICS -->
+    <div class="panel active">
+      <div class="intro-flow">
+        <div class="intro-item">
+          <div class="intro-icon">📄</div>
+          <div class="intro-text"><strong>Paste content or an article</strong>We'll structure it into learning loops.</div>
+        </div>
+        <div class="intro-item">
+          <div class="intro-icon">✎</div>
+          <div class="intro-text"><strong>Write a prompt</strong>Like "World capitals, intermediate" — we'll generate it.</div>
+        </div>
+        <div class="intro-item">
+          <div class="intro-icon">🔄</div>
+          <div class="intro-text"><strong>Mix both</strong>Paste content and ask us to expand or vary it.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Game Name</label>
+        <input type="text" id="gameName" placeholder="e.g., World Capitals">
+      </div>
+      <div class="form-group">
+        <label>Audience</label>
+        <select id="audience">
+          <option value="Language">🌍 Language</option>
+          <option value="Onboarding">🪪 Onboarding</option>
+          <option value="Compliance">🛡️ Compliance</option>
+          <option value="Exam Prep">📝 Exam Prep</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Background Image (optional)</label>
+        <input type="file" id="bgImage" accept="image/*">
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="panel">
+      <div class="form-group">
+        <label>Paste content or write a prompt</label>
+        <textarea id="contentInput" placeholder="Paste an article, or write: 'World capitals trivia' or 'Spanish past tense, B1'"></textarea>
+      </div>
+      <button onclick="parseContent()" id="parseBtn">✦ Sort into loops automatically</button>
+      <div id="loopsDisplay"></div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="panel">
+      <div id="previewDisplay"></div>
+    </div>
+
+    <!-- PUBLISH -->
+    <div class="panel">
+      <button onclick="publishGame()" id="publishBtn">Publish to Library</button>
+      <div id="publishStatus"></div>
+    </div>
+  </div>
+
+  <footer>© 2026 Loops Learning Tools — Imagination and Perseverance</footer>
+
+  <script>
+    let allLoops = [];
+    let backgroundBase64 = null;
+    const WORKER_URL = 'https://dry-credit-f396.seansynge.workers.dev';
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 2) renderPreview();
+    }
+
+    document.getElementById('bgImage').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => { backgroundBase64 = e.target.result; };
+      reader.readAsDataURL(file);
+    });
+
+    async function parseContent() {
+      const input = document.getElementById('contentInput').value.trim();
+      if (!input) { alert('Paste content or write a prompt.'); return; }
+
+      const btn = document.getElementById('parseBtn');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'parse', input })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Generation failed');
+
+        allLoops = data.loops || [];
+        displayLoops();
+        btn.textContent = '✦ Sort into loops automatically';
+        btn.disabled = false;
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.textContent = '✦ Sort into loops automatically';
+        btn.disabled = false;
+      }
+    }
+
+    function displayLoops() {
+      let html = '';
+      allLoops.forEach((loop) => {
+        html += `<div class="loop-card"><div class="loop-header">${loop.emoji} ${loop.name}</div><div class="loop-count">${loop.questions.length} questions</div>`;
+        loop.questions.forEach((q) => {
+          let qDisplay = `<strong>${q.type === 'mc' ? '🔘' : '✎'} ${q.q}</strong>`;
+          if (q.type === 'mc') {
+            qDisplay += `<small>Options: ${q.options.join(', ')}<br>Answer: ${q.answer}</small>`;
+          } else {
+            qDisplay += `<small>Answer: ${q.answer}</small>`;
+          }
+          html += `<div class="q-item">${qDisplay}</div>`;
+        });
+        html += `</div>`;
+      });
+      document.getElementById('loopsDisplay').innerHTML = html || '<div class="empty"><div class="empty-icon">📚</div>No loops yet</div>';
+    }
+
+    // ── REAL PREVIEW: runs the actual shared engine in an iframe, exactly
+    //    as it will appear once published. Pulls engine.js live from the
+    //    library repo so preview always matches production.
+    function buildGameDataForPreview() {
+      const name = document.getElementById('gameName').value.trim() || 'Untitled Game';
+      const audience = document.getElementById('audience').value;
+      const emojiMap = { Language: '🌍', Onboarding: '🪪', Compliance: '🛡️', 'Exam Prep': '📝' };
+      return {
+        slug: 'preview',
+        name,
+        emoji: emojiMap[audience] || '🎮',
+        category: audience,
+        background: backgroundBase64,
+        loops: allLoops.map(l => ({
+          name: l.name,
+          emoji: l.emoji || '🔹',
+          timeLimit: 15,
+          qs: l.questions.map(q => q.type === 'mc'
+            ? { type: 'mc', q: q.q, a: q.answer, opts: q.options }
+            : { type: 'typed', q: q.q, a: q.answer }
+          )
+        }))
+      };
+    }
+
+    const ENGINE_URL = 'https://loops.github.io/games/engine.js';
+
+    function renderPreview() {
+      const container = document.getElementById('previewDisplay');
+      if (allLoops.length === 0) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">📚</div>Create content first</div>';
+        return;
+      }
+
+      const gameData = buildGameDataForPreview();
+      const iframeDoc = `<!doctype html><html><head><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>body{margin:0;font-family:system-ui,sans-serif;background:#eef2f7;padding:16px 0;}</style>
+        </head><body>
+        <div id="loopsApp"></div>
+        <script src="${ENGINE_URL}"><\/script>
+        <script>
+          const GAME_DATA = ${JSON.stringify(gameData)};
+          window.addEventListener('load', function() {
+            if (window.LoopsEngine) LoopsEngine.init(GAME_DATA);
+          });
+        <\/script>
+        </body></html>`;
+
+      container.innerHTML = `<div class="preview-frame-wrap"><iframe id="previewIframe" srcdoc="${iframeDoc.replace(/"/g, '&quot;')}"></iframe></div>
+        <p style="text-align:center;opacity:.6;font-size:.85rem;margin-top:10px;">This is the exact engine your players will use — timer, scoring, and all.</p>`;
+    }
+
+    async function publishGame() {
+      const name = document.getElementById('gameName').value.trim();
+      const audience = document.getElementById('audience').value;
+
+      if (!name) { alert('Enter a game name.'); return; }
+      if (allLoops.length === 0) { alert('Create content first.'); return; }
+
+      const btn = document.getElementById('publishBtn');
+      const status = document.getElementById('publishStatus');
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+      status.textContent = '';
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'publish', gameName: name, audience, loops: allLoops, backgroundBase64 })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Publish failed');
+
+        status.innerHTML = `<div class="status success">✓ Published! <a href="${data.url}" target="_blank">Play it</a> · <a href="https://loops.github.io/games/index.html" target="_blank">View in library</a></div>`;
+        btn.textContent = 'Publish to Library';
+      } catch (err) {
+        status.innerHTML = `<div class="status error">✗ Error: ${err.message}</div>`;
+        btn.textContent = 'Publish to Library';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
